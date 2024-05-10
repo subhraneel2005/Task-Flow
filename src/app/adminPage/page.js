@@ -154,13 +154,9 @@ export default function AdminPage(){
     return(
         <div className="flex h-screen dark select-none">
         {/* Sidebar */}
-        <div className="w-60 bg-slate-950 min-h-screen p-5">
-            <ul className="space-y-4 mt-20">
-                <li className="hover:bg-slate-950 cursor-pointer duration-300 px-4 py-2 text-center border-2 rounded-xl border-slate-700 font-bold text-blue-500">Tasks</li>
-                <li className="hover:bg-slate-950 px-4 py-2 text-center font-bold text-blue-500 border-2 rounded-xl border-slate-700 cursor-pointer duration-300">Projects</li>
-                <li className="hover:bg-slate-950 px-4 py-2 text-center font-bold text-blue-500 border-2 rounded-xl border-slate-700 cursor-pointer duration-300">Pendings</li>
-            </ul>
-            <ul className="space-y-4 mt-4">
+        <div className="w-60 bg-slate-950 min-h-screen p-5 hidden md:block">
+                <h1 className="text-xl mt-6">{`Welcome 👋 ${user?.displayName}`}</h1>
+            <ul className="space-y-4 mt-24">
                 <Popover>
                     <PopoverTrigger>
                         <li className="hover:bg-slate-950 px-12 py-2 text-center font-bold text-blue-500 border-2 rounded-xl border-slate-700 cursor-pointer duration-300">Create tasks</li>
@@ -208,7 +204,7 @@ export default function AdminPage(){
             <div className="block">
             <div className="flex justify-between">
             <Popover>
-                <PopoverTrigger><div className="py-2 px-4 rounded-lg bg-lime-950">Create Task</div></PopoverTrigger>
+                <PopoverTrigger><div className="py-1 px-2 md:py-2 md:px-4 rounded-lg bg-lime-950">Create Task</div></PopoverTrigger>
                 <PopoverContent>
                     <div className="space-y-5">
                     <Input placeholder="Task Name" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)}/>
@@ -219,7 +215,7 @@ export default function AdminPage(){
             </Popover>
             
             <Popover>
-                <PopoverTrigger><div className="py-2 px-4 rounded-lg bg-teal-950">Create Project</div></PopoverTrigger>
+                <PopoverTrigger><div className="py-1 px-2 md:py-2 md:px-4 rounded-lg bg-teal-950">Create Project</div></PopoverTrigger>
                 <PopoverContent>
                     <div className="space-y-5">
                         <Input placeholder="Project Name" value={projectTitle} onChange={(e) => setProjectTitle(e.target.value)}/>
@@ -230,35 +226,49 @@ export default function AdminPage(){
                     </div>
                 </PopoverContent>
             </Popover>
+
+            <Popover>
+            <PopoverTrigger className="md:hidden">
+            <img src={user?.photoURL} className="md:w-12 md:h-12 w-10 h-10 rounded-full cursor-pointer"/>
+            </PopoverTrigger>
+            <PopoverContent>
+                <div className="space-y-6">
+                    <h1>{user?.displayName}</h1>
+                    <p>{user?.email}</p>
+                    <Button onClick={logout} variant="destructive">Logout</Button>
+                </div>
+            </PopoverContent>
+            </Popover>
             </div>
             <div className="mt-5">
                 <h1 className="text-center text-2xl">Yours Tasks 🎯</h1>
-                <div className="grid grid-cols-2 gap-3 mt-5">
+                {tasks.length === 0 ? (<h1 className="text-center mt-6">Start by adding your first task now...</h1>): (<div className="grid md:grid-cols-2 grid-cols-1 gap-3 mt-5">
                     {tasks.map((task) => (
-                        <div key={task.taskId} className="bg-gray-950 border-2 border-slate-800 py-3 px-4 rounded-xl">
+                        <div key={task.taskId} className="bg-gray-950 w-auto h-auto overflow-hidden border-2 border-slate-800 py-3 px-4 rounded-xl">
                             <h1 className="bg-lime-800 px-4 py-3 rounded-xl">{task.taskTitle}</h1>
                             <p className="text-lime-800 mt-4 px-4 py-3 rounded-xl">{task.taskDescription}</p>
                         </div>
                     ))}
-                </div>
+                </div>)}
             </div>
             <div className="mt-16">
                 <h1 className="text-center text-2xl">Yours projects 👩‍💻</h1>
-                <div className="grid grid-cols-2 gap-3 mt-5">
+                {projects.length === 0 ?(<h1 className="text-center mt-5">Start by adding your first project...</h1>) :(<div className="grid md:grid-cols-2 grid-cols-1 gap-3 mt-5">
                     {projects.map((project) => (
-                        <div key={project.projectId} className="bg-gray-950 border-2 border-slate-800 py-3 px-4 rounded-xl">
+                        <div key={project.projectId} className="bg-gray-950 border-2 border-slate-800 py-3 px-4 w-auto h-auto overflow-hidden rounded-xl">
                             <h1 className="bg-sky-800 px-4 py-3 rounded-xl">{project.projectTitle}</h1>
                             <p className="text-sky-800 mt-4 px-4 py-3 rounded-xl">{project.projectDescription}</p>
                             <p className="text-sky-800 mt-4 px-4 py-3 rounded-xl">{`Tech stack: ${project.projectTechStack}`}</p>
                             <p className="text-sky-800 mt-4 px-4 py-3 rounded-xl">{`Project Duration: ${project.projectDuration}`}</p>
                         </div>
                     ))}
-                </div>
+                </div>)}
+                
             </div>
             </div>
         </div>
         {/* User Profile */}
-        <div className="w-60 p-5">
+        <div className="px-5 py-3 md:w-60 md:block hidden">
         <Popover>
             <PopoverTrigger>
             <img src={user?.photoURL} className="w-12 h-12 rounded-full cursor-pointer"/>
