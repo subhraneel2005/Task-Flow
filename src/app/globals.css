@@ -1,4 +1,6 @@
-@tailwind base;
+@import url('https://fonts.googleapis.com/css2?family=Briem+Hand:wght@500&family=Poppins&display=swap');
+
+  @tailwind base;
   @tailwind components;
   @tailwind utilities;
 
@@ -73,5 +75,9 @@
     body {
       @apply bg-background text-foreground;
       color: lightblue;
+      font-family: "Briem Hand", cursive;
+      font-optical-sizing: auto;
+      font-weight: 500;
+      font-style: normal;
     }
   }
