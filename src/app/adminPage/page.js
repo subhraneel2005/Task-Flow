@@ -63,13 +63,13 @@ export default function AdminPage(){
             taskId: Math.random().toString(36).substring(2),
         }
 
+        if(taskTitle === "" || taskDescription === ""){
+            alert("Please fill in all fields");
+            return;
+        }
         tasks.push(newTask);
 
         try {
-            if(taskTitle === "" || taskDescription === ""){
-                alert("Please fill in all fields");
-                return;
-            }
             await addDoc(collection(db,"tasks"),newTask);
             alert("task successfully added to firestore database")
             setTaskTitle("");
@@ -143,13 +143,14 @@ export default function AdminPage(){
             projectId: Math.random().toString(36).substring(2),
         }
 
-        projects.push(newProject);
+        if(projectTitle === "" || projectDescription === ""){
+            alert("Please fill in all the fields");
+            return;
+        }
 
+        projects.push(newProject);
+    
         try {
-            if(projectTitle === "" || projectDescription === ""){
-                alert("Please fill in all the fields");
-                return;
-            }
             await addDoc(collection(db,"projects"),newProject);
             alert("new project added to firestore database");
             setProjectTitle("");
