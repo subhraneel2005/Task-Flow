@@ -12,7 +12,7 @@ import {
   } from "@/components/ui/popover"
 import { Input } from "@/components/ui/input";
 import { db } from "@/firebase/config";
-import { addDoc, collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, query, where } from "firebase/firestore";
 
 export default function AdminPage(){
 
@@ -31,7 +31,6 @@ export default function AdminPage(){
     const [taskDescription, setTaskDescription] = useState("");
     const [isTaskCompleted, setIsTaskCompleted] = useState(false);
     const [tasks, setTasks] = useState([]);
-    const taskId = Math.random().toString(36).substring(2);
 
     //projects
 
@@ -61,12 +60,16 @@ export default function AdminPage(){
             taskDescription: taskDescription,
             createdBy: user?.email,
             isTaskCompleted: isTaskCompleted,
-            taskId: taskId ,
+            taskId: Math.random().toString(36).substring(2),
         }
 
         tasks.push(newTask);
 
         try {
+            if(taskTitle === "" || taskDescription === ""){
+                alert("Please fill in all fields");
+                return;
+            }
             await addDoc(collection(db,"tasks"),newTask);
             alert("task successfully added to firestore database")
             setTaskTitle("");
@@ -93,12 +96,41 @@ export default function AdminPage(){
             console.log(error);
         }  
     }
+
+        //deleteTask
+        const deleteTask = async (task) => {
+            try {
+                console.log("Deleting task:", task);
+        
+                // Find the document ID associated with the task
+                const querySnapshot = await getDocs(collection(db, "tasks"));
+                const taskDoc = querySnapshot.docs.find(doc => doc.data().taskTitle === task.taskTitle && doc.data().createdBy === task.createdBy);
+                const taskId = taskDoc?.id;
+        
+                if (!taskId) {
+                    console.error("Task not found in Firestore");
+                    return;
+                }
+        
+                // Deleting the task from Firestore
+                await deleteDoc(doc(db, "tasks", taskId));
+        
+                // If the deletion is successful, update the local state
+                const updatedTasks = tasks.filter(t => t.taskId !== task.taskId);
+                setTasks(updatedTasks);
+            } catch (error) {
+                console.error("Error deleting task: ", error);
+            }
+        };
+        
+        
         //updateStateOnTaskCompletion
     const updateStateOnTaskCompletion = async() => {
 
     }
     //databse functions for projects
         //createProject
+    
     const createProject = async(e) => {
         e.preventDefault();
 
@@ -114,6 +146,10 @@ export default function AdminPage(){
         projects.push(newProject);
 
         try {
+            if(projectTitle === "" || projectDescription === ""){
+                alert("Please fill in all the fields");
+                return;
+            }
             await addDoc(collection(db,"projects"),newProject);
             alert("new project added to firestore database");
             setProjectTitle("");
@@ -141,6 +177,33 @@ export default function AdminPage(){
             console.log(error);
         }  
     }
+        //delete project
+        const deleteProject = async (project) => {
+            try {
+                console.log("Deleting task:", project);
+        
+                // Find the document ID associated with the task
+                const querySnapshot = await getDocs(collection(db, "projects"));
+                const projectDoc = querySnapshot.docs.find(doc => doc.data().projectTitle === project.projectTitle && doc.data().createdBy === project.createdBy);
+                const projectId = projectDoc?.id;
+        
+                if (!projectId) {
+                    console.error("Project not found in Firestore");
+                    return;
+                }
+        
+                // Deleting the task from Firestore
+                await deleteDoc(doc(db, "projects", projectId));
+        
+                // If the deletion is successful, update the local state
+                const updatedProjects = projects.filter(p => p.projectId !== project.projectId);
+                setProjects(updatedProjects);
+            } catch (error) {
+                console.error("Error deleting projects: ", error);
+            }
+        };
+
+
 
     useEffect(() => {
         getCurrentUserTasks();
@@ -163,8 +226,8 @@ export default function AdminPage(){
                     </PopoverTrigger>
                     <PopoverContent>
                     <div className="space-y-5">
-                    <Input placeholder="Task Name" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)}/>
-                    <Input placeholder="Task Description" value={taskDescription} onChange={(e) => setTaskDescription(e.target.value)}/>
+                    <Input required placeholder="Task Name" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)}/>
+                    <Input required placeholder="Task Description" value={taskDescription} onChange={(e) => setTaskDescription(e.target.value)}/>
                     <Button onClick={createTask}>Create Task</Button>
                     </div>
                 </PopoverContent>
@@ -176,10 +239,10 @@ export default function AdminPage(){
                     </PopoverTrigger>
                     <PopoverContent>
                     <div className="space-y-5">
-                        <Input placeholder="Project Name" value={projectTitle} onChange={(e) => setProjectTitle(e.target.value)}/>
-                        <Input placeholder="Project Description" value={projectDescription} onChange={(e) => setProjectDescription(e.target.value)}/>
-                        <Input placeholder="Tech Stack" value={projectTechStack} onChange={(e) => setProjectTechStack(e.target.value)}/>
-                        <Input placeholder="Expected Duration" value={projectDuration} onChange={(e) => setProjectDuration(e.target.value)}/>
+                        <Input required placeholder="Project Name" value={projectTitle} onChange={(e) => setProjectTitle(e.target.value)}/>
+                        <Input required placeholder="Project Description" value={projectDescription} onChange={(e) => setProjectDescription(e.target.value)}/>
+                        <Input required placeholder="Tech Stack" value={projectTechStack} onChange={(e) => setProjectTechStack(e.target.value)}/>
+                        <Input required placeholder="Expected Duration" value={projectDuration} onChange={(e) => setProjectDuration(e.target.value)}/>
                         <Button onClick={createProject}>Create Project</Button>
                     </div>
                     </PopoverContent>
@@ -207,8 +270,8 @@ export default function AdminPage(){
                 <PopoverTrigger><div className="py-1 px-2 md:py-2 md:px-4 rounded-lg bg-lime-950">Create Task</div></PopoverTrigger>
                 <PopoverContent>
                     <div className="space-y-5">
-                    <Input placeholder="Task Name" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)}/>
-                    <Input placeholder="Task Description" value={taskDescription} onChange={(e) => setTaskDescription(e.target.value)}/>
+                    <Input required placeholder="Task Name" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)}/>
+                    <Input required placeholder="Task Description" value={taskDescription} onChange={(e) => setTaskDescription(e.target.value)}/>
                     <Button onClick={createTask}>Create Task</Button>
                     </div>
                 </PopoverContent>
@@ -218,10 +281,10 @@ export default function AdminPage(){
                 <PopoverTrigger><div className="py-1 px-2 md:py-2 md:px-4 rounded-lg bg-teal-950">Create Project</div></PopoverTrigger>
                 <PopoverContent>
                     <div className="space-y-5">
-                        <Input placeholder="Project Name" value={projectTitle} onChange={(e) => setProjectTitle(e.target.value)}/>
-                        <Input placeholder="Project Description" value={projectDescription} onChange={(e) => setProjectDescription(e.target.value)}/>
-                        <Input placeholder="Tech Stack" value={projectTechStack} onChange={(e) => setProjectTechStack(e.target.value)}/>
-                        <Input placeholder="Expected Duration" value={projectDuration} onChange={(e) => setProjectDuration(e.target.value)}/>
+                        <Input required placeholder="Project Name" value={projectTitle} onChange={(e) => setProjectTitle(e.target.value)}/>
+                        <Input required placeholder="Project Description" value={projectDescription} onChange={(e) => setProjectDescription(e.target.value)}/>
+                        <Input required placeholder="Tech Stack" value={projectTechStack} onChange={(e) => setProjectTechStack(e.target.value)}/>
+                        <Input required placeholder="Expected Duration" value={projectDuration} onChange={(e) => setProjectDuration(e.target.value)}/>
                         <Button onClick={createProject}>Create Project</Button>
                     </div>
                 </PopoverContent>
@@ -247,6 +310,17 @@ export default function AdminPage(){
                         <div key={task.taskId} className="bg-gray-950 w-auto h-auto overflow-hidden border-2 border-slate-800 py-3 px-4 rounded-xl">
                             <h1 className="bg-lime-800 px-4 py-3 rounded-xl">{task.taskTitle}</h1>
                             <p className="text-lime-800 mt-4 px-4 py-3 rounded-xl">{task.taskDescription}</p>
+                            <Popover>
+                                <PopoverTrigger>
+                                    <Button variant="outline">✅</Button>
+                                </PopoverTrigger>
+                                <PopoverContent>
+                                    <div className="space-y-4">
+                                    <h1>Have you completed this task?</h1>
+                                    <Button variant="outline" onClick={() => deleteTask(task)}>Yes!</Button>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
                         </div>
                     ))}
                 </div>)}
@@ -260,6 +334,17 @@ export default function AdminPage(){
                             <p className="text-sky-800 mt-4 px-4 py-3 rounded-xl">{project.projectDescription}</p>
                             <p className="text-sky-800 mt-4 px-4 py-3 rounded-xl">{`Tech stack: ${project.projectTechStack}`}</p>
                             <p className="text-sky-800 mt-4 px-4 py-3 rounded-xl">{`Project Duration: ${project.projectDuration}`}</p>
+                            <Popover>
+                                <PopoverTrigger>
+                                    <Button variant="outline">✅</Button>
+                                </PopoverTrigger>
+                                <PopoverContent>
+                                    <div className="space-y-4">
+                                    <h1>Have you completed this project 🤔?</h1>
+                                    <Button variant="outline" onClick={() => deleteProject(project)}>Yes!</Button>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
                         </div>
                     ))}
                 </div>)}
